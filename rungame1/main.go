@@ -20,7 +20,7 @@ func main() {
 
 	scenemanager.SetScene(&scene.StartScene{})
 
-	err = ebiten.Run(scenemanager.Update, global.ScreenWidth, global.ScreenHeight, 1, "Run Game")
+	err = ebiten.Run(scenemanager.Update, global.ScreenWidth, global.ScreenHeight, 2, "Run Game")
 	if err != nil {
 		log.Fatalf("Run Error: %v", err)
 	}

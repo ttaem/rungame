@@ -2,7 +2,7 @@ package global
 
 const (
 	ScreenWidth  = 320
-	ScreenHeight = 521
+	ScreenHeight = 240
 
 	StartSceneText = "Press Any Button"
 
