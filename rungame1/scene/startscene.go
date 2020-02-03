@@ -33,7 +33,11 @@ func (s *StartScene) Update(screen *ebiten.Image) error {
 	sx := frameIdx * global.FrameWidth
 	sy := global.FrameHeight
 
-	screen.DrawImage(s.runnerImg.SubImage(image.Rect(sx, sy, sx+global.FrameWidth, sy+global.FrameHeight)).(*ebiten.Image), nil)
+	opt := &ebiten.DrawImageOptions{}
+	opt.GeoM.Translate(float64(global.ScreenWidth/2), float64(global.ScreenHeight/2))
+	opt.GeoM.Translate(-float64(global.FrameWidth/2), -float64(global.FrameHeight/2))
+
+	screen.DrawImage(s.runnerImg.SubImage(image.Rect(sx, sy, sx+global.FrameWidth, sy+global.FrameHeight)).(*ebiten.Image), opt)
 
 	return nil
 }
