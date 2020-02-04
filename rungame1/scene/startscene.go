@@ -16,11 +16,17 @@ import (
 
 type StartScene struct {
 	runnerImg *ebiten.Image
+	backImg   *ebiten.Image
 }
 
 func (s *StartScene) StartUp() {
 	var err error
 	s.runnerImg, _, err = ebitenutil.NewImageFromFile("images/runner.png", ebiten.FilterDefault)
+	if err != nil {
+		log.Fatalf("read file error %v\n", err)
+
+	}
+	s.backImg, _, err = ebitenutil.NewImageFromFile("images/background.png", ebiten.FilterDefault)
 	if err != nil {
 		log.Fatalf("read file error %v\n", err)
 
@@ -32,6 +38,8 @@ var frameCount = 0
 func (s *StartScene) Update(screen *ebiten.Image) error {
 	frameCount++
 
+	screen.DrawImage(s.backImg, nil)
+
 	/* Draw Idle Animation */
 	frameIdx := (frameCount / global.IdleAnimSpeed) % global.IdleFrames
 	sx := global.IdleX + frameIdx*global.FrameWidth
@@ -39,7 +47,6 @@ func (s *StartScene) Update(screen *ebiten.Image) error {
 
 	opt := &ebiten.DrawImageOptions{}
 	opt.GeoM.Translate(0, float64(global.ScreenHeight/2))
-	opt.GeoM.Translate(0, -float64(global.FrameHeight/2))
 
 	screen.DrawImage(s.runnerImg.SubImage(image.Rect(sx, sy, sx+global.FrameWidth, sy+global.FrameHeight)).(*ebiten.Image), opt)
 
