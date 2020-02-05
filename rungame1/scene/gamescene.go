@@ -8,19 +8,20 @@ import (
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 
 	//"github.com/hajimehoshi/ebiten/inpututil"
+	"github.com/ttaem/rungame/rungame1/animation"
 	"github.com/ttaem/rungame/rungame1/global"
 )
 
 type GameScene struct {
 	runnerImg *ebiten.Image
 	backImg   *ebiten.Image
+	animation *animation.Handler
 }
 
 func (g *GameScene) StartUp() {
 	var err error
 
-	frameCount = 0
-	g.runnerImg, _, err = ebitenutil.NewImageFromFile("images/runner.png", ebiten.FilterDefault)
+	runnerImg, _, err := ebitenutil.NewImageFromFile("images/runner.png", ebiten.FilterDefault)
 	if err != nil {
 		log.Fatalf("read file error %v\n", err)
 
@@ -30,6 +31,19 @@ func (g *GameScene) StartUp() {
 		log.Fatalf("read file error %v\n", err)
 
 	}
+
+	g.animation = animation.New()
+
+	sprites := make([]*ebiten.Image, global.RunningFrames)
+	for i := 0; i < global.RunningFrames; i++ {
+		sx := 0 + i*global.FrameWidth
+		sy := global.FrameHeight
+		sprites[i] = runnerImg.SubImage(image.Rect(sx, sy, sx+global.FrameWidth, sy+global.FrameHeight)).(*ebiten.Image)
+	}
+	speed := global.RunningAnimSpeed
+
+	g.animation.Add("Run", sprites, speed)
+	g.animation.Play("Run")
 }
 
 func (g *GameScene) Update(screen *ebiten.Image) error {
@@ -47,14 +61,7 @@ func (g *GameScene) Update(screen *ebiten.Image) error {
 	screen.DrawImage(g.backImg, opt)
 
 	/* Draw Running Animation */
-	frameIdx := (frameCount / global.RunningAnimSpeed) % global.RunningFrames
+	g.animation.Update(screen, 0, float64(global.ScreenHeight/2))
 
-	sx := frameIdx * global.FrameWidth
-	sy := global.FrameHeight
-
-	opt = &ebiten.DrawImageOptions{}
-	opt.GeoM.Translate(0, float64(global.ScreenHeight/2))
-
-	screen.DrawImage(g.runnerImg.SubImage(image.Rect(sx, sy, sx+global.FrameWidth, sy+global.FrameHeight)).(*ebiten.Image), opt)
 	return nil
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"github.com/hajimehoshi/ebiten/inpututil"
 
+	"github.com/ttaem/rungame/rungame1/animation"
 	"github.com/ttaem/rungame/rungame1/font"
 	"github.com/ttaem/rungame/rungame1/global"
 	"github.com/ttaem/rungame/rungame1/scenemanager"
@@ -17,11 +18,11 @@ import (
 type StartScene struct {
 	runnerImg *ebiten.Image
 	backImg   *ebiten.Image
+	animation *animation.Handler
 }
 
 func (s *StartScene) StartUp() {
-	var err error
-	s.runnerImg, _, err = ebitenutil.NewImageFromFile("images/runner.png", ebiten.FilterDefault)
+	runnerImg, _, err := ebitenutil.NewImageFromFile("images/runner.png", ebiten.FilterDefault)
 	if err != nil {
 		log.Fatalf("read file error %v\n", err)
 
@@ -31,6 +32,19 @@ func (s *StartScene) StartUp() {
 		log.Fatalf("read file error %v\n", err)
 
 	}
+
+	s.animation = animation.New()
+
+	sprites := make([]*ebiten.Image, global.IdleFrames)
+	for i := 0; i < global.IdleFrames; i++ {
+		sx := global.IdleX + i*global.FrameWidth
+		sy := global.IdleY
+		sprites[i] = runnerImg.SubImage(image.Rect(sx, sy, sx+global.FrameWidth, sy+global.FrameHeight)).(*ebiten.Image)
+	}
+	speed := global.IdleAnimSpeed
+
+	s.animation.Add("Idle", sprites, speed)
+	s.animation.Play("Idle")
 }
 
 var frameCount = 0
@@ -41,14 +55,7 @@ func (s *StartScene) Update(screen *ebiten.Image) error {
 	screen.DrawImage(s.backImg, nil)
 
 	/* Draw Idle Animation */
-	frameIdx := (frameCount / global.IdleAnimSpeed) % global.IdleFrames
-	sx := global.IdleX + frameIdx*global.FrameWidth
-	sy := global.IdleY
-
-	opt := &ebiten.DrawImageOptions{}
-	opt.GeoM.Translate(0, float64(global.ScreenHeight/2))
-
-	screen.DrawImage(s.runnerImg.SubImage(image.Rect(sx, sy, sx+global.FrameWidth, sy+global.FrameHeight)).(*ebiten.Image), opt)
+	s.animation.Update(screen, 0, float64(global.ScreenHeight/2))
 
 	/* Draw Text */
 	size := font.TextWidth(global.StartSceneText, 2)
